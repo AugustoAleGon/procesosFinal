@@ -1,0 +1,28 @@
+{% extends "principal.html"%}
+{% block title %}
+    Cotizaciones
+{% endblock %}
+{% load staticfiles %}
+{% block content %}
+    <h1>
+        {{request.user}}
+    </h1>
+    
+<form method="POST">
+    <div class="form-group">
+        {% csrf_token %}
+        <input name="usuario" id="usuario" placeholder="Usuario" class="form-control"/>
+        <input type="password" name="password" id="password" placeholder="Contraseña" class="form-control"/>
+        <input type="submit" value="Inicia Sesión" class="form-control"/>
+    </div>
+</form>
+
+    <a href="/registro"><button type="button">Registrate</button></a>
+    <a href="/logout"><button type="button">Cerrar Sesión</button></a>
+
+    {% if fail %}
+        <h1>fails</h1>
+    {%endif%}
+{% endblock %}
+{% block js %}
+{% endblock %}

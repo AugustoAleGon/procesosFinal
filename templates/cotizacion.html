@@ -1,0 +1,123 @@
+{% extends "principal.html"%}
+{% block title %}
+  Cotización
+{% endblock %}
+{% load staticfiles %}
+{% block content %}
+<h6>Cotización</h6>
+<form method="POST">
+        {% csrf_token %}
+    <div class="form-group">
+        Persona: {{request.user.first_name}}
+        <select class="form-control" name="producto" >
+            {% for producto in producto_lista %}
+                <option value="{{producto.id}}" >{{producto.nombre}}</option>
+            {% endfor %}
+        </select>
+    <div/>
+    {% if request.user.is_staff %}
+        <div class="form-group">
+            Proveedor: 
+            <select class="form-control" name="proveedor" >
+                {% for proveedor in proveedor_lista %}
+                    <option value="{{proveedor.id}}" >{{proveedor.nombre}}</option>
+                {% endfor %}
+            </select>
+        <div/>
+    {% endif %}
+    
+    <div class="form-group">
+            Unidad :
+            <select class="form-control" name="unidad" >
+                <option value="unidad">Unidad</option>
+                <option value="metro">Metro</option>
+                <option value="litro">Litro</option>
+            </select>
+    </div>
+    <div class="form-group">
+            Cantidad : 
+            <input name="cantidad" value="Cantidad" type="number" class="form-control" />
+    </div>
+        
+        <button type="submit" class="btn btn-success">Guardar Cotización</button>
+    <div/>
+</form>
+<a href="/logout"><button type="button" class="btn btn-danger">Cerrar Sesión</button></a>
+<div>
+    <ul class="nav nav-tabs">
+        <li class="active"><a data-toggle="tab" href="#solicitud">Solicitud</a></li>
+        <li><a data-toggle="tab" href="#aprobada">Aprobadas</a></li>
+        <li><a data-toggle="tab" href="#rechazada">Rechazadas</a></li>
+    </ul>
+    <div class="tab-content">
+        <div id="solicitud" class="tab-pane active">
+            <table>
+                <thead>
+                    <tr>
+                        <th>cotizacion</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cotizacion in cotizaciones_lista %}
+                        {% if cotizacion.estado == "S" %}
+                            <tr>
+                                <td>
+                                    {{cotizacion}}
+                                </td>
+                                <td>
+                                    <form method="POST" action="/aceptar/">
+                                        {% csrf_token %}
+                                        <input type="hidden" name='id' value="{{cotizacion.id}}">                                                        
+                                        {% if request.user.is_staff %}
+                                            <div class="form-group">
+                                                Proveedor: 
+                                                <select class="form-control" name="proveedor" required>
+                                                    {% for proveedor in proveedor_lista %}
+                                                        <option value="{{proveedor.id}}" >{{proveedor.nombre}}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            <div/>
+                                            
+                                        <button type="submit" class="btn btn-success">Aceptar</button>
+                                        {% endif %}
+                                    </form>
+                                </td>
+                                <td>
+                                    <form method="POST" action="/rechazar/">
+                                    {% if request.user.is_staff %}
+                                        <input type="hidden" name='id' value="{{cotizacion.id}}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger">Rechazar</button>
+                                    {% endif %}
+                                    
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endif %}  
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div id="aprobada" class="tab-pane">
+            {% for cotizacion in cotizaciones_lista %}
+                {% if cotizacion.estado == "A" %}
+                    {{cotizacion}} <br>
+                {% endif %}
+            {% endfor %}
+        </div>
+        <div id="rechazada" class="tab-pane">
+            {% for cotizacion in cotizaciones_lista %}
+                {% if cotizacion.estado == "R" %}
+                    {{cotizacion}} <br>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+    
+{% endblock %}
+{% block js %}
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "principal.html"%}
+{% block title %}
+  Registro
+{% endblock %}
+{% load staticfiles %}
+{% block content %}
+
+<form method="POST">
+    <div class="form-group">
+        {% csrf_token %}
+        <input name="nombre" id="nombre" placeholder="Nombre" required class="form-control" />
+        <input name="apellido" id="apellido" placeholder="Apellido" required class="form-control" />
+        <input name="cedula" id="cedula" placeholder="Cedula" required class="form-control" />
+        <input name="user" id="user" placeholder="Usuario" required class="form-control" />
+        <input type="password" name="password" id="password" placeholder="password" required class="form-control" />
+        <input type="submit" value="Registrate" class="form-control" />
+    </div>
+</form>
+<a href="/" class="btn btn-danger"><button type="button">Atras</button></a>
+{% if error%}
+    {{error}}
+{%endif%}
+{% endblock %}
+{% block js %}
+{% endblock %}
