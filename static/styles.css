@@ -1,0 +1,19 @@
+.row-cotizaciones {
+    display: inline-block;
+    padding-left: 20px;
+    padding-right: 20px;
+    margin-top:20px;
+    border-right: 1px solid grey
+}
+
+.row-cotizaciones-final {
+    display: inline-block;
+    padding-left: 20px;
+    padding-right: 20px;
+    margin-top:20px
+}
+
+.container-cotizaciones {
+    display: flex;
+    flex-direction: row
+}

@@ -20,6 +20,8 @@ class Index(TemplateView):
 
     def get(self, request, *args, **kwargs):
         personas_lista = Persona.objects.all()
+        if request.user.is_authenticated: 
+            return redirect('/cotizaciones')
         return render(
             request,
             self.template_name,
@@ -51,6 +53,8 @@ class Registro(TemplateView):
     template_name = "registro.html"
 
     def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated: 
+            return redirect('/cotizaciones')
         return render(
             request,
             self.template_name,
@@ -118,27 +122,13 @@ class Cotizaciones(TemplateView):
             }
         )
 
-    def post(self, request, *args, **kwargs):
-        cotizacion = Cotizacion(
-            unidad=request.POST['unidad'],
-            producto_id=request.POST['producto'],
-            user=request.user,
-            proveedor_id=request.POST.get('proveedor', None),
-            cantidad=request.POST['cantidad'],
-        )
-        if request.POST.get('proveedor', None) == None:
-            cotizacion.estado='S'
-        else:
-            cotizacion.estado='A'
-        cotizacion.save()
-        return redirect('/cotizaciones')
-
 
 def logout_view(request, *args, **kwargs):
     logout(request)
     return redirect('/')
 
 
+@csrf_exempt
 def aceptar(request, *args, **kwargs):
     cotizacion = Cotizacion.objects.filter(id=request.POST['id']).update(
         proveedor_id=request.POST.get('proveedor', None),
@@ -147,8 +137,71 @@ def aceptar(request, *args, **kwargs):
     return redirect('/cotizaciones')
 
 
+@csrf_exempt
 def rechazar(request, *args, **kwargs):
     cotizacion = Cotizacion.objects.filter(id=request.POST['id']).update(
         estado='R'
     )
+    return redirect('/cotizaciones')
+
+
+def cotizaciones_json(request, *args, **kwargs):
+    if request.user.is_staff:
+        cotizaciones_lista = Cotizacion.objects.all()
+    else:
+        cotizaciones_lista = Cotizacion.objects.filter(user=request.user)
+    dicc = {}
+    lista = []
+    for cotizacion in cotizaciones_lista:
+        dicc = {
+            'id': cotizacion.id,
+            'producto':cotizacion.producto.nombre,
+            'user':cotizacion.user.get_full_name(),
+            'cantidad':cotizacion.cantidad,
+            'fecha_creacion':cotizacion.fecha_creacion.strftime('%Y-%m-%d %H:%M:%S'),
+            
+            'estado':cotizacion.estado,
+        }
+        if cotizacion.proveedor:
+            dicc['proveedor']={
+                'nombre':cotizacion.proveedor.nombre,
+                'telefono':cotizacion.proveedor.telefono,
+                'direccion':cotizacion.proveedor.direccion,
+            }
+        if cotizacion.fecha_aprobacion:
+            dicc['fecha_aprobacion']=cotizacion.fecha_aprobacion.strftime('%Y-%m-%d %H:%M:%S'),
+        lista.append(dicc)
+    result = json.dumps(lista, ensure_ascii=False)
+    return HttpResponse(result, content_type='application/json; charset=utf-8')
+
+
+def proveedores_json(request, *args, **kwargs):
+    proveedores_lista = Proveedor.objects.all()
+    dicc = {}
+    lista = []
+    for proveedor in proveedores_lista:
+        dicc={
+            'id':proveedor.id,
+            'nombre':proveedor.nombre,
+            'telefono':proveedor.telefono,
+            'direccion':proveedor.direccion,
+        }
+        lista.append(dicc)
+    result = json.dumps(lista, ensure_ascii=False)
+    return HttpResponse(result, content_type='application/json; charset=utf-8')
+
+
+@csrf_exempt
+def nueva_cotizacion(request, *args, **kwargs):
+    cotizacion = Cotizacion(
+        producto_id=request.POST['producto'],
+        user=request.user,
+        proveedor_id=request.POST.get('proveedor', None),
+        cantidad=request.POST['cantidad'],
+    )
+    if request.POST.get('proveedor', None) == None:
+        cotizacion.estado='S'
+    else:
+        cotizacion.estado='A'
+    cotizacion.save()
     return redirect('/cotizaciones')

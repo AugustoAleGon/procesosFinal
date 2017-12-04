@@ -39,6 +39,8 @@ class Proveedor(models.Model):
 
 # Producto solicitado
 class Producto(models.Model):
+    unidad_choices=(("U" , "Unidad"),("M" , "Metro"),("L" , "Litro"))
+    unidad = models.CharField(max_length=1, choices=unidad_choices)
     nombre = models.CharField(max_length=30)
     
     def __unicode__(self):              # __unicode__ on Python 2
@@ -50,9 +52,7 @@ class Producto(models.Model):
 
 # Registro de la cotización
 class Cotizacion(models.Model):
-    unidad_choices=(("U" , "Unidad"),("M" , "Metro"),("L" , "Litro"))
     estado_choices=(("S" , "Solicitud"),("A" , "Aprobado"),("R" , "Rechazado"))
-    unidad = models.CharField(max_length=1, choices=unidad_choices)
     proveedor = models.ForeignKey(Proveedor, null=True, blank=True)
     producto = models.ForeignKey(Producto)
     user = models.ForeignKey(User)
